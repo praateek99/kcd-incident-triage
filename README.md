@@ -53,11 +53,14 @@ All data are synthetic and seeded. Results were produced with Python 3.13, NumPy
 - With 400 or more incidents the rules gave no significant saving (and +0.3% cost at 1,000 incidents, 30% defects).
 - The scarce-data saving held in all eight sensitivity settings, including a calibrated classifier.
 
-## Version history (for transparency)
+## Version and development history
 
-- `v1-original-submission-draft` (git tag): first version. An independent pre-submission review found that the reviewer was more accurate at the scale ends than stated, that KR5 could fire with a missing component, that defect rate and training size changed the underlying cases, and that the routing score ignored reviewer error. All were fixed in v2 and every result was regenerated on fresh seeds.
-- Earlier pilots: using rules as deferral triggers did not beat cost-aware deferral, so rules became decision bounds; cost coefficients were changed from 500/150 to 400/300 after the first pilot.
-- Limitations: synthetic data generated under the same domain assumptions as the rules, illustrative costs and reviewer model, linear classifier.
+This repository contains the reviewed v2.1 source snapshot. Earlier development versions are retained in the author's local archive; their original commits and tags were not transferred to this GitHub repository. The snapshot name does not imply that a GitHub release or tag has been published.
+
+- An independent pre-submission review found that the original reviewer simulation was more accurate at the scale ends than stated, KR5 could fire with a missing component, defect rate and training size changed the underlying cases, and the routing score ignored reviewer error. These issues were corrected before the v2 confirmation experiments, and all results were regenerated on fresh seeds.
+- The v2.1 snapshot adds Figure 1 label fixes to v2.0; scientific code and result CSVs are unchanged.
+- Earlier pilots used rules as deferral triggers without improving on cost-aware deferral, so rules became decision bounds. Cost coefficients were changed from 500/150 to 400/300 after the first pilot.
+- Limitations: synthetic data generated under the same domain assumptions as the rules, illustrative costs and reviewer model, and a linear classifier.
 
 ## License
 
