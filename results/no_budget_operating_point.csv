@@ -1,0 +1,17 @@
+n_train,test_defect,method,deferred,cost_per_incident
+150,0.3,"KCD, no budget",0.758,197.8446
+150,0.3,"Reviewer-aware, no budget",0.7552,199.2717
+150,0.6,"KCD, no budget",0.7695,202.9029
+150,0.6,"Reviewer-aware, no budget",0.7672,204.1612
+400,0.3,"KCD, no budget",0.7494,181.0192
+400,0.3,"Reviewer-aware, no budget",0.7484,181.1796
+400,0.6,"KCD, no budget",0.7721,186.095
+400,0.6,"Reviewer-aware, no budget",0.7708,186.3554
+1000,0.3,"KCD, no budget",0.7334,172.5083
+1000,0.3,"Reviewer-aware, no budget",0.7317,172.7208
+1000,0.6,"KCD, no budget",0.7687,174.7429
+1000,0.6,"Reviewer-aware, no budget",0.7664,175.0083
+2400,0.3,"KCD, no budget",0.7083,167.3279
+2400,0.3,"Reviewer-aware, no budget",0.7061,167.3608
+2400,0.6,"KCD, no budget",0.7516,169.0558
+2400,0.6,"Reviewer-aware, no budget",0.7485,169.1108

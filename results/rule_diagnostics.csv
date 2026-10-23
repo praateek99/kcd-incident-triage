@@ -1,0 +1,11 @@
+test_defect,rule,firing_rate_pct,agreement_pct,agreement_min_pct,agreement_max_pct
+0.3,KR1_security_floor,5.02,92.52,85.39,97.62
+0.3,KR2_core_outage_floor,4.96,99.35,95.89,100.0
+0.3,KR3_status_floor,16.03,76.61,70.82,86.5
+0.3,KR4_wide_core_outage,1.35,86.61,61.11,100.0
+0.3,KR5_cosmetic_ceiling,8.18,94.52,83.21,99.28
+0.6,KR1_security_floor,5.02,92.52,85.39,97.62
+0.6,KR2_core_outage_floor,3.77,99.31,95.31,100.0
+0.6,KR3_status_floor,15.98,69.85,62.61,80.95
+0.6,KR4_wide_core_outage,0.95,86.95,61.54,100.0
+0.6,KR5_cosmetic_ceiling,6.11,94.31,84.21,99.08

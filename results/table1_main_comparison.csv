@@ -1,0 +1,17 @@
+Training incidents,Method,Deferred (%),Error on answered (%),Severe under-triage (%),Cost per incident,Cost SD,Mean saving vs always-answer (%)
+150,Rules-only agent,0.0,54.648,78.745,665.181,131.173,-132.404
+150,"Data agent, always answer",0.0,57.238,15.187,289.46,18.449,0.0
+150,Random deferral,20.0,57.182,13.184,267.331,14.972,7.571
+150,Completeness deferral,20.0,56.359,12.121,256.602,15.008,11.294
+150,Max-probability deferral,20.0,54.208,15.239,267.094,18.108,7.728
+150,Risk-ranked deferral (heuristic),20.0,54.161,14.086,259.377,17.718,10.406
+150,Reviewer-aware deferral,20.0,54.299,13.887,259.05,17.847,10.525
+150,KCD (proposed),20.0,53.758,13.485,254.438,16.94,12.096
+2400,Rules-only agent,0.0,54.648,78.745,665.181,131.173,-221.294
+2400,"Data agent, always answer",0.0,49.556,8.17,208.206,11.435,0.0
+2400,Random deferral,20.0,49.534,7.676,203.094,9.594,2.4
+2400,Completeness deferral,20.0,47.698,7.135,192.608,10.096,7.453
+2400,Max-probability deferral,20.0,47.221,8.19,197.89,9.825,4.911
+2400,Risk-ranked deferral (heuristic),20.0,45.732,7.384,187.715,9.427,9.796
+2400,Reviewer-aware deferral,20.0,45.966,7.207,188.048,9.283,9.632
+2400,KCD (proposed),20.0,46.049,7.161,188.265,9.347,9.533
