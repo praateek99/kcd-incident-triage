@@ -35,7 +35,8 @@ All data are synthetic and seeded. Results were produced with Python 3.13, NumPy
 | `results/no_budget_operating_point.csv` | Deferral without a quota (defer when expected benefit > 0) |
 | `results/sensitivity_summary.csv`, `results/sensitivity_runs.csv` | Eight sensitivity settings at 150 and 2,400 incidents |
 | `results/all_runs.csv` | Every replication, condition, policy and budget |
-| `results/figure1_framework.*`, `results/figure2_results.*` | Figures (1000 dpi PNG and vector PDF) |
+| `results/figure1_budget.*` | Figure 1: cost vs review budget at 150 and 2,400 training incidents (1000 dpi PNG, vector PDF) |
+| `results/figure2_results.*` | Figure 2: knowledge effect by training size and across sensitivity settings (1000 dpi PNG, vector PDF) |
 
 ## Experimental design
 
@@ -55,7 +56,9 @@ All data are synthetic and seeded. Results were produced with Python 3.13, NumPy
 
 ## Version and development history
 
-This repository contains the reviewed v2.1 source snapshot. Earlier development versions are retained in the author's local archive; their original commits and tags were not transferred to this GitHub repository. The snapshot name does not imply that a GitHub release or tag has been published.
+v2.2: figures redrawn in a monochrome, print-friendly style; the framework diagram was replaced by a data figure (cost vs review budget), and Figure 2 now adds the sensitivity analyses. Results and CSV files are unchanged from v2.1.
+
+This repository contains the v2.2 figure update to the reviewed v2.1 source snapshot. Earlier development versions are retained in the author's local archive; their original commits and tags were not transferred to this GitHub repository.
 
 - An independent pre-submission review found that the original reviewer simulation was more accurate at the scale ends than stated, KR5 could fire with a missing component, defect rate and training size changed the underlying cases, and the routing score ignored reviewer error. These issues were corrected before the v2 confirmation experiments, and all results were regenerated on fresh seeds.
 - The v2.1 snapshot adds Figure 1 label fixes to v2.0; scientific code and result CSVs are unchanged.

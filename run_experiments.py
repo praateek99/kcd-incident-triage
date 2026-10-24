@@ -14,7 +14,6 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.patches import FancyBboxPatch
 import numpy as np
 import pandas as pd
 from scipy.stats import t as student_t, wilcoxon
@@ -291,74 +290,81 @@ def sensitivity():
 # ---------------------------------------------------------------------------
 plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 9, "axes.spines.top": False,
                      "axes.spines.right": False, "savefig.dpi": 1000, "pdf.fonttype": 42})
-INK, MUTED, BLUE, ORANGE, GREEN, GREY, PURPLE = "#1f2933", "#6b7280", "#2563eb", "#d97706", "#059669", "#9ca3af", "#7c3aed"
+# Monochrome, print-friendly styles: policies are distinguished by line style and marker, not colour.
+POLICY_STYLE = {
+    "Random deferral":          dict(color="#9a9a9a", ls="--", marker=None),
+    "Max-probability deferral": dict(color="#6e6e6e", ls="-.", marker=None),
+    "Completeness deferral":    dict(color="#444444", ls=":",  marker=None),
+    RA:                         dict(color="#222222", ls="-",  marker="o"),
+    KCD:                        dict(color="#000000", ls="-",  marker="s"),
+}
+SENS_LABEL = {
+    "Baseline": "Baseline",
+    "Higher label noise (sd 0.60)": "Higher noise",
+    "Stronger company heterogeneity (sd 0.50)": "More company variation",
+    "Reviewer accuracy 0.85": "Reviewer acc. 0.85",
+    "Reviewer accuracy 0.98": "Reviewer acc. 0.98",
+    "Over-triage cost 150": "Over-triage cost 150",
+    "Over-triage cost 450": "Over-triage cost 450",
+    "Calibrated classifier (sigmoid, train-only CV)": "Calibrated",
+}
 
 
-def figure1():
-    fig, ax = plt.subplots(figsize=(7.6, 3.1))
-    ax.set_xlim(-1.5, 121.5); ax.set_ylim(-2, 43); ax.axis("off")
-
-    def box(x, y, w, h, title, body, color):
-        ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.4,rounding_size=1.2",
-                                    fc="white", ec=color, lw=1.4))
-        ax.text(x + w / 2, y + h - 2.2, title, ha="center", va="top", fontsize=8, weight="bold", color=color)
-        ax.text(x + w / 2, y + h / 2 - 2.5, body, ha="center", va="center", fontsize=7, color=INK, linespacing=1.4)
-
-    def arrow(x0, y0, x1, y1, label=None, dy=1.6):
-        ax.annotate("", (x1, y1), (x0, y0), arrowprops=dict(arrowstyle="-|>", color=MUTED, lw=1.1))
-        if label:
-            ax.text((x0 + x1) / 2, (y0 + y1) / 2 + dy, label, ha="center", va="center", fontsize=6,
-                    color=MUTED, bbox=dict(fc="white", ec="none", pad=0.6))
-
-    box(0.3, 11, 20.5, 24, "Incident-time\nevidence", "first status update,\ncomponent, scope,\nposted status\n(may be missing\nor conflicting)", INK)
-    box(27, 25, 23, 16, "Data-driven\nagent", "\nTF-IDF + one-hot\nlogistic regression\n$P(t\\mid x)$", BLUE)
-    box(27, 3, 23, 18, "Knowledge base", "5 study-defined rules:\nseverity floors and\nceilings $[lo(x), hi(x)]$", GREEN)
-    box(61, 11, 27, 24, "Cost-aware decision",
-        "$d^*$ = lowest expected\ncost level in $[lo, hi]$\n\nbenefit of review\n$\\Delta(x)=r^*(x)-D(x)$", ORANGE)
-    box(98, 25, 22, 16, "Answer", "agent assigns\nimpact level $d^*$", INK)
-    box(98, 3, 22, 18, "Human review", "the $\\lceil bn\\rceil$ incidents\nwith the largest\n$\\Delta(x)$ (budget $b$)", INK)
-    arrow(21.6, 28, 26.6, 32); arrow(21.6, 18, 26.6, 12)
-    arrow(50.8, 32, 60.4, 28, "probabilities", 3.0); arrow(50.8, 12, 60.4, 17, "bounds", -3.0)
-    arrow(88.8, 28, 97.4, 32, "low $\\Delta$", 3.0); arrow(88.8, 17, 97.4, 12, "high $\\Delta$", -3.0)
-    ax.text(60, -1.5, "$C(t,k)$: under-triage $400(t-k)(1+t)$, over-triage $300(k-t)$; $D$ = 120 + expected reviewer error cost", ha="center", fontsize=6.2, color=MUTED, style="italic")
-    fig.savefig(OUT / "figure1_framework.png", bbox_inches="tight")
-    fig.savefig(OUT / "figure1_framework.pdf", bbox_inches="tight")
+def figure1(df):
+    """Cost against review budget with scarce (150) and ample (2,400) training data, 30% defects."""
+    fig, axes = plt.subplots(1, 2, figsize=(7.2, 2.6), sharey=False, gridspec_kw={"wspace": 0.28})
+    for ax, n, tag in ((axes[0], 150, "(a) 150 training incidents"), (axes[1], 2400, "(b) 2,400 training incidents")):
+        base = cost(df, n, 0.30, DATA)
+        blo, bhi = t_ci(base)
+        for m, st in POLICY_STYLE.items():
+            xs, mu, lo, hi = [0.0], [base.mean()], [blo], [bhi]
+            for bud in BUDGETS:
+                c = cost(df, n, 0.30, m, bud)
+                l, h = t_ci(c)
+                xs.append(bud); mu.append(c.mean()); lo.append(l); hi.append(h)
+            xs = 100 * np.array(xs)
+            ax.plot(xs, mu, color=st["color"], ls=st["ls"], marker=st["marker"], ms=3.2, lw=1.3,
+                    markevery=2, label=m.replace(" (proposed)", "").replace(" deferral", ""))
+            ax.fill_between(xs, lo, hi, color="#000000", alpha=0.06, lw=0)
+        ax.set_xlabel("Human review budget (% of incidents)")
+        ax.set_title(tag, fontsize=9, loc="left")
+    axes[0].set_ylabel("Simulated cost per incident")
+    axes[1].legend(frameon=False, fontsize=7, loc="lower left")
+    fig.savefig(OUT / "figure1_budget.png", bbox_inches="tight")
+    fig.savefig(OUT / "figure1_budget.pdf", bbox_inches="tight")
     plt.close(fig)
 
 
 def figure2(df):
-    fig, (a, b) = plt.subplots(1, 2, figsize=(7.2, 2.9), gridspec_kw={"wspace": 0.32})
-    styles = {"Random deferral": (GREY, "--"), "Completeness deferral": (PURPLE, ":"),
-              "Max-probability deferral": (ORANGE, "-"), RA: (BLUE, "-"), KCD: (GREEN, "-")}
-    base = cost(df, 150, 0.30, DATA)
-    blo, bhi = t_ci(base)
-    for m, (col, ls) in styles.items():
-        xs, mu, lo, hi = [0.0], [base.mean()], [blo], [bhi]
-        for bud in BUDGETS:
-            c = cost(df, 150, 0.30, m, bud)
-            l, h = t_ci(c)
-            xs.append(bud); mu.append(c.mean()); lo.append(l); hi.append(h)
-        xs = 100 * np.array(xs)
-        a.plot(xs, mu, ls, color=col, lw=1.5, label=m.replace(" (proposed)", ""))
-        a.fill_between(xs, lo, hi, color=col, alpha=0.12, lw=0)
-    a.set_xlabel("Human review budget (% of incidents deferred)")
-    a.set_ylabel("Simulated cost per incident")
-    a.set_title("(a) Scarce data: 150 labelled incidents", fontsize=9, loc="left")
-    a.legend(frameon=False, fontsize=6.5)
-    for rate, col, mk in ((0.30, BLUE, "o"), (0.60, ORANGE, "s")):
+    """(a) Knowledge effect by training size; (b) knowledge effect across sensitivity settings."""
+    fig, (a, b) = plt.subplots(1, 2, figsize=(7.2, 2.8), gridspec_kw={"wspace": 0.62, "width_ratios": [1, 1]})
+    for rate, mk, fill, off in ((0.30, "o", "black", 0.97), (0.60, "s", "white", 1.03)):
         mus, err = [], []
         for n in N_TRAIN:
             k = ke(df, n, rate)
             lo, hi = boot_ci(k)
             mus.append(k.mean()); err.append((k.mean() - lo, hi - k.mean()))
-        b.errorbar(N_TRAIN, mus, yerr=np.array(err).T, color=col, marker=mk, ms=4, lw=1.4, capsize=3,
-                   label=f"test defect rate {int(rate * 100)}%")
-    b.axhline(0, color=MUTED, lw=0.8)
-    b.set_xscale("log"); b.minorticks_off(); b.set_xticks(N_TRAIN); b.set_xticklabels(N_TRAIN)
-    b.set_xlabel("Labelled training incidents (log scale)")
-    b.set_ylabel("Cost change from knowledge (%)")
-    b.set_title("(b) Knowledge effect within reviewer-aware deferral", fontsize=9, loc="left")
-    b.legend(frameon=False, fontsize=7)
+        a.errorbar(np.array(N_TRAIN) * off, mus, yerr=np.array(err).T, color="black", mfc=fill, marker=mk, ms=4.5,
+                   lw=1.1, ls="-" if rate == 0.30 else "--", capsize=2.5, label=f"{int(rate * 100)}% test defects")
+    a.axhline(0, color="#888888", lw=0.8)
+    a.set_xscale("log"); a.minorticks_off(); a.set_xticks(N_TRAIN); a.set_xticklabels(N_TRAIN)
+    a.set_xlabel("Labelled training incidents (log scale)")
+    a.set_ylabel("Cost change from knowledge rules (%)")
+    a.set_title("(a) By training-set size", fontsize=9, loc="left")
+    a.legend(frameon=False, fontsize=7, loc="upper left")
+    ss = pd.read_csv(OUT / "sensitivity_summary.csv")
+    names = list(SENS_LABEL)
+    y = np.arange(len(names))[::-1]
+    for n, mk, fill, dy in ((150, "o", "black", 0.15), (2400, "s", "white", -0.15)):
+        s = ss[ss["Training incidents"] == n].set_index("Setting").loc[names]
+        b.errorbar(s["Knowledge effect (%)"], y + dy,
+                   xerr=[s["Knowledge effect (%)"] - s["KE CI low"], s["KE CI high"] - s["Knowledge effect (%)"]],
+                   fmt=mk, color="black", mfc=fill, ms=4.5, lw=1.0, capsize=2.5, label=f"{n:,} training incidents")
+    b.axvline(0, color="#888888", lw=0.8)
+    b.set_yticks(y); b.set_yticklabels([SENS_LABEL[k] for k in names], fontsize=7.5)
+    b.set_xlabel("Cost change from knowledge rules (%)")
+    b.set_title("(b) Sensitivity analyses", fontsize=9, loc="left")
+    b.legend(frameon=False, fontsize=7, loc="upper center", bbox_to_anchor=(0.45, -0.2), ncol=2)
     fig.savefig(OUT / "figure2_results.png", bbox_inches="tight")
     fig.savefig(OUT / "figure2_results.pdf", bbox_inches="tight")
     plt.close(fig)
@@ -367,7 +373,7 @@ def figure2(df):
 if __name__ == "__main__":
     pd.set_option("display.width", 220); pd.set_option("display.max_columns", 30)
     if "--figures-only" in sys.argv:
-        figure1(); figure2(pd.read_csv(OUT / "all_runs.csv")); raise SystemExit
+        d = pd.read_csv(OUT / "all_runs.csv"); figure1(d); figure2(d); raise SystemExit
     if "--dev" in sys.argv:                       # development seeds only; nothing is saved
         global_R = 5
         rows = []
@@ -381,7 +387,7 @@ if __name__ == "__main__":
     t1, t2, it = table1(df), table2(df), interaction(df)
     diag, rd = diagnostics(df, cal, rules)
     sens = sensitivity()
-    figure1(); figure2(df)
+    figure1(df); figure2(df)
     print(t1.round(2).to_string(index=False)); print(); print(t2.round(4).to_string(index=False)); print()
     print(it.round(4).to_string(index=False)); print(); print(diag.round(3).to_string(index=False)); print()
     print(rd); print(); print(pd.read_csv(OUT / "calibration.csv")); print()
